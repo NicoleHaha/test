@@ -1,22 +1,32 @@
-node('master') {
-    checkout scm
-
-    stage('Build') {
-        docker.image('maven:3.3.3').inside {
-            sh 'mvn --version'
+pipeline {
+    agent any
+	
+    stages {
+        stage('Build') {
+            steps {
+                checkout scm
+                echo 'Building..'
+                sh 'make'
+                archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Testing..'
+                sh 'make check || true' 
+                junit '**/target/*.xml' 
+            }
+        }
+        stage('Deploy') {
+            when {
+                expression {
+                    currentBuild.result == null || currentBuild.result == 'SUCCESS' ¢Ù
+                }
+            }
+            steps {
+                echo 'Deploying..'
+                sh 'make publish'
+            }
         }
     }
-
-
-
-
-
-    stage('Deploy') {
-        if (env.BRANCH_NAME == 'master') {
-            echo 'I only execute on the master branch'
-        } else {
-            echo 'I execute elsewhere'
-        }
-    }
-
 }
