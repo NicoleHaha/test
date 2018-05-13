@@ -1,13 +1,11 @@
 node('master') {
     checkout scm
 
-
     stage('Build') {
         docker.image('maven:3.3.3').inside {
             sh 'mvn --version'
         }
     }
-
 
     stage('Deploy') {
         if (env.BRANCH_NAME == 'master') {
@@ -16,5 +14,4 @@ node('master') {
             echo 'I execute elsewhere'
         }
     }
-
 }
